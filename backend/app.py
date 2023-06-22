@@ -1,13 +1,8 @@
-from flask import Flask, render_template
+from website import init_app
 
 # create instance of flask app
-app = Flask(__name__)
-
-# decorator sets this as root in website
-@app.route("/")
-def homePage():
-    # html that is being run on the page
-    return render_template("index.html")
+app = init_app()
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)
+    
