@@ -1,1 +1,6 @@
 venv/
+instance/
+./website/__pycache__/
+*.pyc
+*.cpython-310.pyc
+backend/website/__pycache__/

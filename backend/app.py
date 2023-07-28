@@ -1,8 +1,10 @@
 from website import init_app
+from website.events import socketio
 
-# create instance of flask app
-app = init_app()
 
 if __name__ == "__main__":
-    app.run()
+    # create instance of flask app
+    app = init_app()    
+    
+    socketio.run(app)
     

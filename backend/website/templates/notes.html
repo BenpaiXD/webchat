@@ -1,26 +1,36 @@
 {% extends 'base.html' %}
 
 {% block title %}
-    Home
+    Notes
 {% endblock %}
 
 {% block content %}
     <h1 align="center">Notes</h1>
-    <ul class="list-group list-group-flush" id="notes">
-        {% for note in user.notes %}
-            <li class="list-group-item">
-                {{ note.data }}
-                <button type="button" class="close" onClick="deleteNote({{ note.id }})">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </li>
-        {% endfor %}
-    </ul>
-    <form method="POST">
+    <div id="noteBox" class="scrollable-area" style="height: 60vh; overflow-y: auto;">
+        <ul class="list-group list-group-flush" id="notes">
+            {% for note in user.notes %}
+                <li class="list-group-item">
+                    {{ note.data }}
+                    <button type="button" class="close" onClick="deleteNote({{ note.id }})">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+    <form method="POST" action="/new-note">
         <textarea name="note" id="note" class="form-control"></textarea>
         <br>
         <div align="center">
             <button type="submit" class="btn btn-primary">Add Note</Button>
         </div>
     </form>
+
+    <script>
+        // JavaScript to scroll to the bottom of noteBox
+        document.addEventListener("DOMContentLoaded", function() {
+            var scrollableArea = document.getElementById('noteBox');
+            scrollableArea.scrollTop = scrollableArea.scrollHeight;
+        });
+    </script>
 {% endblock %}

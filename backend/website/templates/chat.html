@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Chat
+{% endblock %}
+
+{% block content %}
+    <h1 align="center">Chat</h1>
+
+    <!-- temp empty div, filled with form to fill username of new chat user -->
+    <div id="newChatUsers"></div>
+    
+
+    <div class="container">
+    <div class="row">
+        <!-- div containing all available chats and a button to start a new one -->
+        <div class="col-md-3 left-div">
+            <ul class="list-group list-group-flush" id="chats">
+                {% for chat in chats %}
+                    <li class="list-group-item">
+                        <a href="/chat/?chat_id={{ chat._mapping['id']}}">
+                            <button type="submit" onClick="joinChat({{ chat._mapping['id'] }})">
+                                {{ chat._mapping['name'] }}
+                            </button>
+                        </a>
+                    </li>
+                {% endfor %}
+                <li class="list-group-item">
+                    <button type="button" class="" onClick="addNewChatBox('newChatUsers')">
+                        New Chat
+                    </button>
+                </li>
+            </ul>
+        </div>
+
+        
+        <div class="col-md-9 center-div">
+            <div id="messageBox" class="scrollable-area" style="height: 60vh; overflow-y: auto;">
+                <ul class="list-group message-list" id="messages">
+                    {% for message in messages %}
+                        {% if user.id == message.user_id %}
+                            <li class="bubble bottom">
+                                {{ message.data }}
+                            </li>
+                        {% else %}
+                            <li class="bubble left">
+                                {{ message.data }}
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <button type="button" onClick="testbutton()">socket test</button>
+
+
+    <!-- textbox and post button for chatting -->
+    {% if chat_id != -1 %}
+        <form method="POST" action="/send-chat/?chat_id={{ chat_id }}">
+            <textarea name="message" id="message" class="form-control" required></textarea>
+            <br>
+            <div align="center">
+                <button type="submit" class="btn btn-primary">Send</Button>
+            </div>
+        </form>
+    {% endif %}
+
+    <script type="text/javascript">
+        // JavaScript to scroll to the bottom of messageBox
+        document.addEventListener("DOMContentLoaded", function() {
+            var scrollableArea = document.getElementById('chatBox');
+            scrollableArea.scrollTop = scrollableArea.scrollHeight;
+        });
+
+
+        const socketio = io();
+
+        const joinChat = (id) => {
+            console.log(id)
+            socketio.emit('joinChat', {'chat_id': id});
+        };
+
+        //
+    </script>
+    
+
+
+    
+
+{% endblock %}

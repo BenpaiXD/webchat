@@ -5,9 +5,24 @@ from sqlalchemy.sql import func
 
 class Chat(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(32))
+    users = db.relationship('User_Chat')
     
 
+class User_Chat(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    chat_id = db.Column(db.Integer, db.ForeignKey('chat.id'))
+
 class Message(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    chat_id = db.Column(db.Integer)
+    data = db.Column(db.String(10000))
+    date = db.Column(db.DateTime(timezone=True), default=func.now())
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+
+    
+class Note(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     data = db.Column(db.String(10000))
     date = db.Column(db.DateTime(timezone=True), default=func.now())
@@ -20,4 +35,6 @@ class User(db.Model, UserMixin):
     firstname = db.Column(db.String(128))
     lastname = db.Column(db.String(128))
     username = db.Column(db.String(128))
-    notes = db.relationship('Message')
+    notes = db.relationship('Note')
+    messages = db.relationship('Message')
+    chats = db.relationship('User_Chat')

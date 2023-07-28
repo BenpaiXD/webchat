@@ -6,3 +6,35 @@ function deleteNote(noteId) {
         window.location.href = "/notes"
     });
 }
+
+function addNewChatBox(id) {
+
+    var html = `
+    <form method="POST" action="/new-chat">
+        <input type="text" id='chatUser' name='chatUser' required>
+        <button class="btn btn-primary" onClick="newChat()">Chat</button>
+    </form>
+    `;
+    
+    document.getElementById(id).innerHTML = html;
+}
+
+function newChat() {
+    username = document.getElementById('chatUser').value;
+    fetch('/new-chat', {
+        method: 'POST',
+        body: JSON.stringify({username: username}),
+    }).then((_res) => {
+        window.location.href = "/chat"
+    });
+}
+
+function addNote() {
+    noteText = document.getElementById('note').value;
+    fetch('/new-note', {
+        method: 'POST',
+        body: JSON.stringify({noteText: noteText}),
+    }).then((_res) => {
+        window.location.href = "/notes"
+    });
+}
