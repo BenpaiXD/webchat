@@ -10,19 +10,15 @@
     <!-- temp empty div, filled with form to fill username of new chat user -->
     <div id="newChatUsers"></div>
     
-
-    <div class="container">
     <div class="row">
         <!-- div containing all available chats and a button to start a new one -->
         <div class="col-md-3 left-div">
             <ul class="list-group list-group-flush" id="chats">
                 {% for chat in chats %}
                     <li class="list-group-item">
-                        <a href="/chat/?chat_id={{ chat._mapping['id']}}">
-                            <button type="submit" onClick="joinChat({{ chat._mapping['id'] }})">
-                                {{ chat._mapping['name'] }}
-                            </button>
-                        </a>
+                        <button onClick="joinChat({{ chat._mapping['id'] }})">
+                            {{ chat._mapping['name'] }}
+                        </button>
                     </li>
                 {% endfor %}
                 <li class="list-group-item">
@@ -35,38 +31,18 @@
 
         
         <div class="col-md-9 center-div">
-            <div id="messageBox" class="scrollable-area" style="height: 60vh; overflow-y: auto;">
+            <div id="messageBox" class="scrollable-area" style="height: 60vh; overflow-y: auto;" current-user="{{user.id}}">
                 <ul class="list-group message-list" id="messages">
-                    {% for message in messages %}
-                        {% if user.id == message.user_id %}
-                            <li class="bubble bottom">
-                                {{ message.data }}
-                            </li>
-                        {% else %}
-                            <li class="bubble left">
-                                {{ message.data }}
-                            </li>
-                        {% endif %}
-                    {% endfor %}
+
                 </ul>
             </div>
         </div>
     </div>
-    </div>
-
-    <button type="button" onClick="testbutton()">socket test</button>
 
 
     <!-- textbox and post button for chatting -->
-    {% if chat_id != -1 %}
-        <form method="POST" action="/send-chat/?chat_id={{ chat_id }}">
-            <textarea name="message" id="message" class="form-control" required></textarea>
-            <br>
-            <div align="center">
-                <button type="submit" class="btn btn-primary">Send</Button>
-            </div>
-        </form>
-    {% endif %}
+    <div id="send-div"></div>
+        
 
     <script type="text/javascript">
         // JavaScript to scroll to the bottom of messageBox
@@ -74,20 +50,134 @@
             var scrollableArea = document.getElementById('chatBox');
             scrollableArea.scrollTop = scrollableArea.scrollHeight;
         });
+        
+        
 
 
         const socketio = io();
+        const currUser = document.getElementById("messageBox").getAttribute("current-user");
+        const messages = document.getElementById('messages');
+        const chatlist = document.getElementById("chats")
 
         const joinChat = (id) => {
-            console.log(id)
             socketio.emit('joinChat', {'chat_id': id});
+            messages.innerHTML = ""
+
+            fetch('/load-messages/?chat_id=' + id, {
+                method: 'GET',
+            }).then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                console.log(response);
+                return response.json();
+            }).then(data => {
+                // 'data' now contains the JSON response
+                console.log(data);
+                data.forEach(msg => displayMessage(msg.user_id, msg.data));
+            }).catch(error => {
+                console.error('Error fetching data:', error);
+            });
+
+            document.getElementById('send-div').innerHTML = `
+            <div class="chat-container">
+                <div class="form-container">
+                    <div class="form-inline">
+                        <div class="form-group">
+                            <label class="btn btn-primary btn-file">
+                                <i class="fa fa-plus"></i>
+                                <input id="fileInput" type="file" onchange="" style="display: none;">
+                            </label>
+                        </div>
+                        <div class="form-group flex-grow-1">
+                            <p id="fileName"></p>
+                            <textarea id="tbMessage" class="form-control" style="width: 100%; max-width: 100%;" rows="1" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <button class="btn btn-primary" onClick="sendMessage(${id})">Send</Button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            `
         };
 
-        //
+        const newChat = () => {
+            var username = document.getElementById('chatUser').value;
+            document.getElementById("newChatUsers").internalHTML = "";
+
+            socketio.emit("new-chat", {"username": username, "currentUserID": currUser});
+        }
+
+        const displayMessage = (user_id, msg) => {
+            var content = "";
+            
+            if(user_id == currUser) {
+                content = `
+                    <li class="d-flex justify-content-end">
+                        <div class="bubble bottom">${msg}</div>
+                    </li>
+                `;
+            }
+            else {
+                content = `
+                    <li class="bubble left">${msg}</li>
+                `;
+            }
+            messages.innerHTML += content;
+        }
+
+        socketio.on("message", (data) => {
+            displayMessage(data.user_id, data.message)
+        });
+
+        // ne message sent
+        const sendMessage = (chat_id) => {
+            const message = document.getElementById('tbMessage');
+            let file = document.getElementById('fileInput').files[0];
+            file = (file === undefined) ? null : file;
+
+
+            console.log("file: " + file);
+
+            if(message.value == "") return;
+            
+            data = {
+                'chat_id': chat_id, 
+                'data': message.value, 
+                'file': file
+            }
+            message.value = "";
+            console.log(data);
+            
+            
+            socketio.emit('sendMessage', data);
+        }
+
+        socketio.on("chat-created", (data) => {
+            chatlist.innerHTML = `
+            <li class="list-group-item">
+                <button onClick="joinChat(${data.id})">
+                    ${data.name}
+                </button>
+            </li>
+            ` + chatlist.innerHTML;
+            joinChat(data.id);
+        });
+
+        function displayFileName() {
+            const fileInput = document.getElementById("fileInput");
+            const fileNameDisplay = document.getElementById("fileName");
+
+            if (fileInput.files.length > 0) {
+                fileNameDisplay.textContent = "Selected file: " + fileInput.files[0].name;
+            } else {
+                fileNameDisplay.textContent = "";
+            }
+        }
+
+
     </script>
-    
-
-
     
 
 {% endblock %}

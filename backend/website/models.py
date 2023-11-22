@@ -20,6 +20,7 @@ class Message(db.Model):
     data = db.Column(db.String(10000))
     date = db.Column(db.DateTime(timezone=True), default=func.now())
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    file_ids = db.relationship('Files')
 
     
 class Note(db.Model):
@@ -38,3 +39,8 @@ class User(db.Model, UserMixin):
     notes = db.relationship('Note')
     messages = db.relationship('Message')
     chats = db.relationship('User_Chat')
+
+class Files(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    filename = db.Column(db.String(128))
+    msg_id = db.Column(db.Integer, db.ForeignKey('message.id'))

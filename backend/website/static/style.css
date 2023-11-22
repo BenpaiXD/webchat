@@ -1,3 +1,13 @@
+.chat-container {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 100%;
+  }
+  .form-container {
+	width: 80%;
+  }
+
 body {
     padding-top: 70px;
   }

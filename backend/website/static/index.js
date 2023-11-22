@@ -10,15 +10,13 @@ function deleteNote(noteId) {
 function addNewChatBox(id) {
 
     var html = `
-    <form method="POST" action="/new-chat">
         <input type="text" id='chatUser' name='chatUser' required>
         <button class="btn btn-primary" onClick="newChat()">Chat</button>
-    </form>
     `;
     
     document.getElementById(id).innerHTML = html;
 }
-
+/*
 function newChat() {
     username = document.getElementById('chatUser').value;
     fetch('/new-chat', {
@@ -28,6 +26,7 @@ function newChat() {
         window.location.href = "/chat"
     });
 }
+*/
 
 function addNote() {
     noteText = document.getElementById('note').value;

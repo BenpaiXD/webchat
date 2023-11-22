@@ -38,10 +38,8 @@ def chat():
     chats = db.session.execute(query)
     chats = [r for r in chats]
 
-    messages = Message.query.filter_by(chat_id=chat_id).all()
 
-
-    return render_template("chat.html", user=current_user, chats=chats, messages=messages, chat_id=chat_id)
+    return render_template("chat.html", user=current_user, chats=chats, chat_id=chat_id)
 
 
 @views.route('/new-note/', methods=['POST'])
@@ -60,7 +58,6 @@ def new_note():
 @login_required
 def send_chat():
     messageText = request.form.get('message')
-    print()
     chat_id = request.args.get('chat_id')
     new_message = Message(data=messageText, chat_id=chat_id, user_id=current_user.id)
     
@@ -93,7 +90,6 @@ def new_chat():
     db.session.add_all([new_chat, new_userchat_relation, new_userchat_relation2])
     db.session.commit()
     flash("chat created", category='success')
-    redirect(url_for('views.chat'))
 
     return redirect(url_for('views.chat'))
 
@@ -108,6 +104,14 @@ def delete_note():
             db.session.delete(note)
             db.session.commit()
     return jsonify({})
+
+@views.route('/load-messages/', methods=['GET'])
+def loadMessages():
+    chat_id = request.args.get('chat_id')
+    messages = Message.query.filter_by(chat_id=chat_id).all()
+    
+    return jsonify([{'user_id': msg.user_id,  'data': msg.data} for msg in messages])
+
 
     
     
